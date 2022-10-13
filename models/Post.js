@@ -5,11 +5,15 @@ const PostSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  time: {
+    type: String,
+    required: true,
+  },
   date: {
     type: String,
     required: true,
   },
-  commment: String,
+  comment: String,
   person: {
     type: String,
     required: true,
