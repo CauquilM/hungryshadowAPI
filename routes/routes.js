@@ -16,6 +16,7 @@ router.post("/", (req, res) => {
     portion: req.body.portion,
     comment: req.body.comment,
     person: req.body.person,
+    date: req.body.date,
   });
 
   post

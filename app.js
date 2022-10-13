@@ -12,7 +12,13 @@ const routes = require("./routes/routes");
 
 app.use("/", routes);
 
-mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true }, () =>
-  console.log("Connection")
+mongoose.connect(
+  process.env.DB_CONNECTION,
+  { useNewUrlParser: true },
+  () =>
+    console.log(
+      `Connection ${new Date().getHours()}:${new Date().getMinutes()}`
+    )
+  
 );
 app.listen(3000);
