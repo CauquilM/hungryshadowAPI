@@ -2,15 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
-
-router.get("/login", async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    res.json({ message: error });
-  }
-});
+const jwt = require("jsonwebtoken");
 
 router.post("/register", async (req, res) => {
   try {
@@ -47,11 +39,16 @@ router.post("/login", (req, res) => {
     } else {
       try {
         if (await bcrypt.compare(req.body.password, user.password)) {
-          res.send("success");
+          const accessToken = jwt.sign(
+            { username: req.body.username, password: user.password },
+            process.env.ACCESS_TOKEN_SECRET
+          );
+          res.json({ accessToken: accessToken });
         } else {
+          res.send("Wrong credentials");
         }
       } catch {
-        res.status(401).send("not found");
+        res.status(401).send("here not found");
       }
     }
   });
