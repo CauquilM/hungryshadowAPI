@@ -8,9 +8,11 @@ require("dotenv/config");
 app.use(cors());
 app.use(bodyParser.json());
 
-const routes = require("./routes/routes");
+const posts = require("./routes/posts");
+const users = require("./routes/users");
 
-app.use("/", routes);
+app.use("/", posts);
+app.use("/", users);
 
 mongoose.connect(
   process.env.DB_CONNECTION,
