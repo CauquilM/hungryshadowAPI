@@ -2,15 +2,19 @@ const jwt = require("jsonwebtoken");
 
 function authenticateToken(req, res, next) {
   const token = req.headers["authorization"];
-  if (token == null) return res.sendStatus(401);
+  if (token == null) {
+    res.status(401);
+    res.send("No token");
+    return;
+  }
 
   try {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     next();
   } catch (error) {
-    return res.status(404).json({
-      message: "Auth failed",
-    });
+    res.status(401);
+    res.send("Auth failed");
+    return;
   }
 }
 
