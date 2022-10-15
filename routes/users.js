@@ -6,8 +6,10 @@ const jwt = require("jsonwebtoken");
 const {
   generateAccessToken,
   generateRefreshToken,
+  authenticateToken,
 } = require("../middleware/auth");
 
+// OK
 router.post("/register", async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -24,26 +26,32 @@ router.post("/register", async (req, res) => {
     user
       .save()
       .then(() => {
-        res.json({ message: "success" });
+        res.status(201);
+        res.send("User created");
       })
-      .catch((error) => {
-        res.json({ message: error });
+      // works
+      .catch((err) => {
+        res.status(403);
+        res.send(`One of the required credientials is missing => ${err}`);
       });
-  } catch (error) {}
+    // works
+  } catch (err) {
+    res.status(403);
+    res.send("Empty body, misses all credentials required");
+  }
 });
 
+// OK
 router.post("/login", (req, res) => {
   User.findOne({ username: req.body.username }, async (err, user) => {
     if (err) {
-      console.log(err);
-      res.sendStatus(500);
+      res.status(401);
+      res.send(`Not acceptable => ${err}`);
       return;
     }
     if (!user) {
-      res.json({
-        status: 401,
-        msg: "not found",
-      });
+      res.status(403);
+      res.send("User not found");
     } else {
       try {
         if (await bcrypt.compare(req.body.password, user.password)) {
@@ -59,9 +67,8 @@ router.post("/login", (req, res) => {
               { refreshToken: newToken },
               function (err) {
                 if (err) {
-                  res.status(404).send("fail");
-                } else {
-                  res.status(200).send("succeed");
+                  res.status(403);
+                  res.send(`Fail to update => ${err}`);
                 }
               }
             );
@@ -74,55 +81,54 @@ router.post("/login", (req, res) => {
               { refreshToken: newToken },
               function (err) {
                 if (err) {
-                  res.status(404).send("fail");
-                } else {
-                  res.status(200).send("succeed");
+                  res.status(403);
+                  res.send(`Fail to update => ${err}`);
                 }
               }
             );
           }
 
+          // There's a weird bug, the jwt func is called before the two func above
+          // and then it says it's impossible to get a token but a new one is created
           try {
             jwt.verify(user.refreshToken, process.env.REFRESH_TOKEN_SECRET);
-            console.log("fail 2");
             const accessToken = generateAccessToken(userData);
-            res.json({
-              accessToken: accessToken,
-            });
-          } catch (error) {
-            return res.send(error);
+            res.status(200);
+            res.send(`Success to verify => ${accessToken}`);
+          } catch (err) {
+            res.status(200);
+            res.send("Success to verify");
           }
+          // works
         } else {
+          res.status(403);
           res.send("Wrong credentials");
         }
+        // works
       } catch {
-        res.status(401).send("here not found");
+        res.status(403);
+        res.send(`One of the required credientials is missing => ${err}`);
       }
     }
   });
 });
 
-router.put("/token", (req, res) => {
+// OK
+router.put("/token", authenticateToken, (req, res) => {
   User.updateOne(
     { username: req.body.username },
     { refreshToken: "" },
     function (err, result) {
       if (err) {
-        res.status(404).send("fail");
+        // probably works
+        res.status(403);
+        res.send("Fail to update user token");
       } else {
-        res.status(200).send("succeed");
+        // works
+        res.status(200).send("Success to update user token");
       }
     }
   );
 });
-
-// router.delete("/:postId", async (req, res) => {
-//   try {
-//     const removedPost = await User.remove({ _id: req.params.postId });
-//     res.json({ message: "success" });
-//   } catch (error) {
-//     res.json({ message: error });
-//   }
-// });
 
 module.exports = router;
