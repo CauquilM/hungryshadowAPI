@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 function authenticateToken(req, res, next) {
-  const token = req.headers["authorization"];
+  const token = req.headers["authorization"].split(' ')[1];
   if (token == null) {
     res.status(401);
     res.send("No token");
@@ -12,8 +12,9 @@ function authenticateToken(req, res, next) {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     next();
   } catch (error) {
+    console.log(token);
     res.status(401);
-    res.send("Auth failed");
+    res.send("Token Auth failed");
     return;
   }
 }
