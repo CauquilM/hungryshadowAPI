@@ -113,7 +113,7 @@ router.post("/login", async (req, res) => {
             jwt.verify(user.refreshToken, process.env.REFRESH_TOKEN_SECRET);
             const accessToken = generateAccessToken(userData);
             res.status(200);
-            res.send(`Success to verify => ${accessToken}`);
+            res.send({ accessToken: accessToken });
           } catch (err) {
             res.status(200);
             res.send("Success to verify");
