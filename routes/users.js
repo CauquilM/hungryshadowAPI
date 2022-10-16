@@ -10,39 +10,56 @@ const {
 } = require("../middleware/auth");
 
 // OK
-router.post("/register", async (req, res) => {
-  try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const user = new User({
-      username: req.body.username,
-      password: hashedPassword,
-      email: req.body.email,
-      refreshToken: generateRefreshToken({
-        username: req.body.username,
-        password: hashedPassword,
-      }),
-    });
-
-    user
-      .save()
-      .then(() => {
-        res.status(201);
-        res.send("User created");
-      })
-      // works
-      .catch((err) => {
+router.post("/register", (req, res) => {
+  console.log("test");
+  User.findOne({
+    $or: [{ username: req.body.username }, { email: req.body.email }],
+  })
+    .then(async (user) => {
+      if (user) {
+        console.log("test2");
         res.status(403);
-        res.send(`One of the required credientials is missing => ${err}`);
-      });
-    // works
-  } catch (err) {
-    res.status(403);
-    res.send("Empty body, misses all credentials required");
-  }
+        res.send("Username or email already taken");
+      } else {
+        try {
+          console.log("3");
+          const hashedPassword = await bcrypt.hash(req.body.password, 10);
+          console.log("4");
+          const user = new User({
+            username: req.body.username,
+            password: hashedPassword,
+            email: req.body.email,
+            refreshToken: generateRefreshToken({
+              username: req.body.username,
+              password: req.body.password,
+            }),
+          });
+          user
+            .save()
+            .then(() => {
+              res.status(201);
+              res.send("User created");
+            })
+            // works
+            .catch((err) => {
+              res.status(403);
+              res.send(`One of the required credientials is missing => ${err}`);
+            });
+          // works
+        } catch (err) {
+          res.status(403);
+          res.send("Empty body, misses all credentials required");
+        }
+      }
+    })
+    .catch((err) => {
+      res.status(401);
+      res.send(`Not acceptable => ${err}`);
+    });
 });
 
 // OK
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   User.findOne({ username: req.body.username }, async (err, user) => {
     if (err) {
       res.status(401);
@@ -55,6 +72,8 @@ router.post("/login", (req, res) => {
     } else {
       try {
         if (await bcrypt.compare(req.body.password, user.password)) {
+          const check = await bcrypt.compare(req.body.password, user.password);
+          console.log("compare", user.password);
           const userData = {
             username: req.body.username,
             password: user.password,
