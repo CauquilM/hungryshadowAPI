@@ -8,8 +8,9 @@ router.get("/", authenticateToken, async (req, res) => {
   try {
     // works
     const posts = await Post.find();
+    console.log(posts);
     res.status(200);
-    res.send(`Success to get posts => ${posts}`);
+    res.send(posts);
   } catch (err) {
     // probably works
     res.status(403);
