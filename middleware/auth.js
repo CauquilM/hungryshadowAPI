@@ -12,6 +12,7 @@ function authenticateToken(req, res, next) {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     next();
   } catch (error) {
+    console.log(token);
     res.status(401);
     res.send("Token Auth failed");
     return;
