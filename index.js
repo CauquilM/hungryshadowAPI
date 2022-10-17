@@ -17,4 +17,4 @@ app.use("/auth", users);
 mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true }, () =>
   console.log(`Connection ${new Date().getHours()}:${new Date().getMinutes()}`)
 );
-app.listen(3000);
+app.listen(process.env.PORT || 3000);
