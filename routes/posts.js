@@ -8,7 +8,6 @@ router.get("/", authenticateToken, async (req, res) => {
   try {
     // works
     const posts = await Post.find();
-    console.log(posts);
     res.status(200);
     res.send(posts);
   } catch (err) {

@@ -11,20 +11,16 @@ const {
 
 // OK
 router.post("/register", (req, res) => {
-  console.log("test");
   User.findOne({
     $or: [{ username: req.body.username }, { email: req.body.email }],
   })
     .then(async (user) => {
       if (user) {
-        console.log("test2");
         res.status(403);
         res.send("Username or email already taken");
       } else {
         try {
-          console.log("3");
           const hashedPassword = await bcrypt.hash(req.body.password, 10);
-          console.log("4");
           const user = new User({
             username: req.body.username,
             password: hashedPassword,
@@ -73,7 +69,6 @@ router.post("/login", async (req, res) => {
       try {
         if (await bcrypt.compare(req.body.password, user.password)) {
           await bcrypt.compare(req.body.password, user.password);
-          console.log("compare", user.password);
           const userData = {
             username: req.body.username,
             password: user.password,
