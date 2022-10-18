@@ -4,7 +4,7 @@ const Post = require("../models/Post");
 const { authenticateToken } = require("../middleware/auth");
 
 // OK
-router.get("/", async (req, res) => {
+router.get("/", authenticateToken, async (req, res) => {
   try {
     // works
     const posts = await Post.find();
