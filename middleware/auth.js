@@ -14,7 +14,7 @@ function authenticateToken(req, res, next) {
   } catch (error) {
     console.log(token);
     res.status(401);
-    res.send("Token Auth failed");
+    res.send(`Token Auth failed ${token}`);
     return;
   }
 }
