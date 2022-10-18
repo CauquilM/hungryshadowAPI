@@ -10,7 +10,7 @@ const {
 } = require("../middleware/auth");
 
 // OK
-router.post("/register", authenticateToken, (req, res) => {
+router.post("/register", (req, res) => {
   console.log("test");
   User.findOne({
     $or: [{ username: req.body.username }, { email: req.body.email }],
@@ -59,7 +59,7 @@ router.post("/register", authenticateToken, (req, res) => {
 });
 
 // OK
-router.post("/login", authenticateToken, async (req, res) => {
+router.post("/login", async (req, res) => {
   User.findOne({ username: req.body.username }, async (err, user) => {
     if (err) {
       res.status(401);
