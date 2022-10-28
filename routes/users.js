@@ -65,7 +65,7 @@ router.post("/login", (req, res) => {
     .then(async (user) => {
       if (!user) {
         res.status(403);
-        res.send("User not found");
+        res.send("User not found", req);
       } else {
         try {
           if (await bcrypt.compare(req.body.password, user.password)) {
