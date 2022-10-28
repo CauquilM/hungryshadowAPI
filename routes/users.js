@@ -110,7 +110,7 @@ router.post("/login", (req, res) => {
               res.send({ accessToken: accessToken });
             } catch (err) {
               res.status(200);
-              res.send("Success to verify");
+              res.send("Success to verify", err);
             }
             // works
           } else {
