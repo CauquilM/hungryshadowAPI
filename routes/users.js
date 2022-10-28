@@ -124,9 +124,9 @@ router.post("/login", (req, res) => {
         }
       }
     })
-    .catch((err) => {
+    .catch(() => {
       res.status(401);
-      res.send(`Not acceptable => ${err}`);
+      res.send(`Not acceptable => ${req}`);
     });
 });
 
