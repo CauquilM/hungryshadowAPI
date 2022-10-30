@@ -11,20 +11,17 @@ const {
 
 // OK
 router.post("/register", (req, res) => {
-  console.log("test");
   User.findOne({
     $or: [{ username: req.body.username }, { email: req.body.email }],
   })
     .then(async (user) => {
       if (user) {
-        console.log("test2");
         res.status(403);
         res.send("Username or email already taken");
       } else {
         try {
-          console.log("3");
           const hashedPassword = await bcrypt.hash(req.body.password, 10);
-          console.log("4");
+
           const user = new User({
             username: req.body.username,
             password: hashedPassword,
@@ -60,51 +57,54 @@ router.post("/register", (req, res) => {
 
 // OK
 router.post("/login", (req, res) => {
-  console.log("test 1");
-  User.findOne({ username: req.body.username })
-    .then(async (user) => {
-      if (!user) {
-        res.status(403);
-        res.send("User not found", req);
-      } else {
-        try {
-          if (await bcrypt.compare(req.body.password, user.password)) {
-            await bcrypt.compare(req.body.password, user.password);
-            console.log("compare", user.password);
-            const userData = {
-              username: req.body.username,
-              password: user.password,
-            };
+  User.findOne({ username: req.body.username }).then(async (user) => {
+    if (!user) {
+      res.status(403);
+      res.send("User not found", req);
+    } else {
+      try {
+        if (await bcrypt.compare(req.body.password, user.password)) {
+          await bcrypt.compare(req.body.password, user.password);
 
-            if (user.refreshToken == "") {
-              const newToken = generateRefreshToken(userData);
-              User.updateOne(
-                { username: req.body.username },
-                { refreshToken: newToken },
-                function (err) {
-                  if (err) {
-                    res.status(403);
-                    res.send(`Fail to update => ${err}`);
-                  }
-                }
-              );
-            }
+          const userData = {
+            username: req.body.username,
+            password: user.password,
+          };
 
-            if (!user.refreshToken) {
-              const newToken = generateRefreshToken(userData);
-              User.updateOne(
-                { username: req.body.username },
-                { refreshToken: newToken },
-                function (err) {
-                  if (err) {
-                    res.status(403);
-                    res.send(`Fail to update => ${err}`);
-                  }
+          if (user.refreshToken == "") {
+            const newToken = generateRefreshToken(userData);
+            User.updateOne(
+              { username: req.body.username },
+              { refreshToken: newToken },
+              function (err) {
+                if (err) {
+                  res.status(403);
+                  res.send(`Fail to update => ${err}`);
                 }
-              );
-            }
+              }
+            );
+          }
+
+          if (!user.refreshToken) {
+            const newToken = generateRefreshToken(userData);
+            await User.updateOne(
+              { username: req.body.username },
+              { refreshToken: newToken },
+              function (err) {
+                if (err) {
+                  res.status(403);
+                  res.send(`Fail to update => ${err}`);
+                }
+              }
+            );
+          }
+
+          User.findOne({ username: req.body.username }).then((newUser) => {
             try {
-              jwt.verify(user.refreshToken, process.env.REFRESH_TOKEN_SECRET);
+              jwt.verify(
+                newUser.refreshToken,
+                process.env.REFRESH_TOKEN_SECRET
+              );
               const accessToken = generateAccessToken(userData);
               res.status(200);
               res.send({ accessToken: accessToken });
@@ -112,22 +112,22 @@ router.post("/login", (req, res) => {
               res.status(200);
               res.send("Success to verify", err);
             }
-            // works
-          } else {
-            res.status(403);
-            res.send("Wrong credentials");
-          }
+          });
           // works
-        } catch {
+        } else {
           res.status(403);
-          res.send(`One of the required credientials is missing => ${err}`);
+          res.send("Wrong credentials");
         }
+        // works
+      } catch (err) {
+        res.status(403);
+        res.send(`One of the required credientials is missing => ${err}`);
       }
-    })
-    .catch(() => {
-      res.status(401);
-      res.send(`Not acceptable => ${req}`);
-    });
+    }
+  });
+
+  // res.status(401);
+  //   res.send(`End of function => ${req.body}`);
 });
 
 // OK
