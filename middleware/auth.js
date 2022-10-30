@@ -21,7 +21,7 @@ function authenticateToken(req, res, next) {
 
 function generateAccessToken(userData) {
   return jwt.sign(userData, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "2m",
   });
 }
 function generateRefreshToken(userData) {

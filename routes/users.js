@@ -87,7 +87,7 @@ router.post("/login", (req, res) => {
 
           if (!user.refreshToken) {
             const newToken = generateRefreshToken(userData);
-            await User.updateOne(
+            User.updateOne(
               { username: req.body.username },
               { refreshToken: newToken },
               function (err) {
