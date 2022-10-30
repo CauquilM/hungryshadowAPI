@@ -18,5 +18,4 @@ const users = require("./routes/users");
 app.use("/posts", posts);
 app.use("/auth", users);
 
-
 app.listen(process.env.PORT || 3000);
