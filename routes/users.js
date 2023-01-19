@@ -11,20 +11,17 @@ const {
 
 // OK
 router.post("/register", (req, res) => {
-  console.log("test");
   User.findOne({
     $or: [{ username: req.body.username }, { email: req.body.email }],
   })
     .then(async (user) => {
       if (user) {
-        console.log("test2");
         res.status(403);
         res.send("Username or email already taken");
       } else {
         try {
-          console.log("3");
           const hashedPassword = await bcrypt.hash(req.body.password, 10);
-          console.log("4");
+
           const user = new User({
             username: req.body.username,
             password: hashedPassword,
@@ -59,21 +56,16 @@ router.post("/register", (req, res) => {
 });
 
 // OK
-router.post("/login", async (req, res) => {
-  User.findOne({ username: req.body.username }, async (err, user) => {
-    if (err) {
-      res.status(401);
-      res.send(`Not acceptable => ${err}`);
-      return;
-    }
+router.post("/login", (req, res) => {
+  User.findOne({ username: req.body.username }).then(async (user) => {
     if (!user) {
       res.status(403);
-      res.send("User not found");
+      res.send("User not found", req);
     } else {
       try {
         if (await bcrypt.compare(req.body.password, user.password)) {
           await bcrypt.compare(req.body.password, user.password);
-          console.log("compare", user.password);
+
           const userData = {
             username: req.body.username,
             password: user.password,
@@ -107,29 +99,35 @@ router.post("/login", async (req, res) => {
             );
           }
 
-          // There's a weird bug, the jwt func is called before the two func above
-          // and then it says it's impossible to get a token but a new one is created
-          try {
-            jwt.verify(user.refreshToken, process.env.REFRESH_TOKEN_SECRET);
-            const accessToken = generateAccessToken(userData);
-            res.status(200);
-            res.send({ accessToken: accessToken });
-          } catch (err) {
-            res.status(200);
-            res.send("Success to verify");
-          }
+          User.findOne({ username: req.body.username }).then((newUser) => {
+            try {
+              jwt.verify(
+                newUser.refreshToken,
+                process.env.REFRESH_TOKEN_SECRET
+              );
+              const accessToken = generateAccessToken(userData);
+              res.status(200);
+              res.send({ accessToken: accessToken });
+            } catch (err) {
+              res.status(200);
+              res.send("Success to verify", err);
+            }
+          });
           // works
         } else {
           res.status(403);
           res.send("Wrong credentials");
         }
         // works
-      } catch {
+      } catch (err) {
         res.status(403);
         res.send(`One of the required credientials is missing => ${err}`);
       }
     }
   });
+
+  // res.status(401);
+  //   res.send(`End of function => ${req.body}`);
 });
 
 // OK

@@ -14,14 +14,14 @@ function authenticateToken(req, res, next) {
   } catch (error) {
     console.log(token);
     res.status(401);
-    res.send("Token Auth failed");
+    res.send(`Token Auth failed ${token}`);
     return;
   }
 }
 
 function generateAccessToken(userData) {
   return jwt.sign(userData, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "2m",
   });
 }
 function generateRefreshToken(userData) {
