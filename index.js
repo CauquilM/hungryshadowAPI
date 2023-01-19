@@ -5,6 +5,8 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv/config");
 
+mongoose.set('strictQuery', true);
+
 mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true }, () =>
   console.log(`Connection ${new Date().getHours()}:${new Date().getMinutes()}`)
 );
